@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 import keys
 
-openai.api_key = keys.api_key
+openai.api_key = keys.openai_api_key
 DISCORD_TOKEN = keys.DISCORD_TOKEN
 
 intents = discord.Intents.default()
