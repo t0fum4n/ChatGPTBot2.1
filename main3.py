@@ -3,7 +3,7 @@ import discord
 import keys
 import re
 
-## this is the WIP ##
+## this is the main ##
 
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
