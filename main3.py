@@ -23,7 +23,7 @@ def chat_completion(message):
     prompt = re.sub(regex, "", prompt)
     chathistory.append({"role": "user", "content": prompt})
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-3.5-turbo-16k",
         messages=chathistory,
         temperature=0.3,
     )
