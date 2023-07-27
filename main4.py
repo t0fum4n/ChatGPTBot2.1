@@ -3,6 +3,8 @@ import discord
 import keys
 import re
 
+##This is the stable file##
+
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
