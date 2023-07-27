@@ -13,7 +13,7 @@ openai.api_key = keys.openai_api_key
 
 # Create global chat history variable
 chathistory = [
-    {"role": "system", "content": "You are a Discord Bot that is powered by OpenAI. You are an absolute CHAD. Your name is ChadGPT."},
+    {"role": "system", "content": "You are a Discord Bot that is powered by OpenAI. You are an absolute CHAD. Your name is ChadGPT."},{"role": "system", "content": "Your creator's name is Tyler Hodges."},
 ]
 
 def chat_completion(message):
