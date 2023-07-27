@@ -16,17 +16,23 @@ bot = commands.Bot(command_prefix='$', intents=intents)
 async def on_ready():
     print(f'We have logged in as {bot.user}')
 
+# Define your bot
+bot = commands.Bot(command_prefix='$', intents=intents)
+
+@bot.event
+async def on_ready():
+    print(f'We have logged in as {bot.user}')
+
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
 
-    if message.content.startswith('$chat'):
-        await handle_chat(message)
+    await handle_chat(message)
 
 async def handle_chat(message):
     chat_history = []
-    user_input = message.content.lstrip('$chat ')
+    user_input = message.content
     chat_history.append({'role': 'user', 'content': user_input})
 
     response = openai.ChatCompletion.create(
@@ -40,3 +46,10 @@ async def handle_chat(message):
     await message.channel.send(bot_response)
 
 bot.run(DISCORD_TOKEN)
+
+
+
+
+
+
+
