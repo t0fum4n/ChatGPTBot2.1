@@ -2,8 +2,11 @@ import openai
 import discord
 import keys
 import re
+import os
+import psutil
+import shutil
 
-#this is the WIP#
+## this is the wip ##
 
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
@@ -17,24 +20,35 @@ chathistory = [
     {"role": "system", "content": "Your creator's name is Tyler Hodges."},
 ]
 
+def get_system_info(command):
+    if command == "!CPU":
+        cpu_usage = psutil.cpu_percent(interval=1)
+        return f"CPU usage is: {cpu_usage}%"
+    elif command == "!RAM":
+        mem_info = psutil.virtual_memory()
+        return f"RAM usage is: {mem_info.percent}%"
+    elif command == "!disk":
+        total, used, free = shutil.disk_usage("/")
+        return f"Total: {total // (2**30)}GiB, Used: {used // (2**30)}GiB, Free: {free // (2**30)}GiB"
+    else:
+        return None
+
 def chat_completion(message):
     # Generate a response using OpenAI's GPT-3
     prompt = message.content
     regex = r"<.*?>"
     prompt = re.sub(regex, "", prompt)
+    system_info = get_system_info(prompt)
+    if system_info is not None:
+        return system_info
     chathistory.append({"role": "user", "content": prompt})
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-16k",
-            messages=chathistory,
-            temperature=0.3,
-        )
-        reply = response.choices[0].message.content
-        chathistory.append({"role": "assistant", "content": reply})
-    except openai.error.RateLimitError:
-        # When the token limit is reached, clear the chat history and try again
-        chathistory.clear()
-        reply = "Sorry, I've reached the token limit. Let's start over!"
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo-16k",
+        messages=chathistory,
+        temperature=0.3,
+    )
+    reply = response.choices[0].message.content
+    chathistory.append({"role": "assistant", "content": reply})
     return reply
 
 async def send_message_chunks(channel, message):
