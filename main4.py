@@ -2,7 +2,6 @@ import openai
 import discord
 import keys
 import re
-import os
 import psutil
 import shutil
 
@@ -18,30 +17,27 @@ openai.api_key = keys.openai_api_key
 chathistory = [
     {"role": "system", "content": "You are a Discord Bot that is powered by OpenAI. You are an absolute CHAD. Your name is ChadGPT."},
     {"role": "system", "content": "Your creator's name is Tyler Hodges."},
+    {"role": "system", "content": "When asked about system information like CPU usage, RAM usage, or disk usage, respond with 'CPU FUNCTION', 'RAM FUNCTION', or 'DISK FUNCTION' respectively."},
 ]
 
-def get_system_info(command):
-    if command == "!CPU":
+def get_system_info(info_type):
+    if info_type == "CPU":
         cpu_usage = psutil.cpu_percent(interval=1)
-        return f"CPU usage is: {cpu_usage}%"
-    elif command == "!RAM":
-        mem_info = psutil.virtual_memory()
-        return f"RAM usage is: {mem_info.percent}%"
-    elif command == "!disk":
+        return f"The current CPU usage is {cpu_usage}%."
+    elif info_type == "RAM":
+        ram_usage = psutil.virtual_memory().percent
+        return f"The current RAM usage is {ram_usage}%."
+    elif info_type == "disk":
         total, used, free = shutil.disk_usage("/")
-        return f"Total: {total // (2**30)}GiB, Used: {used // (2**30)}GiB, Free: {free // (2**30)}GiB"
+        return f"Total: {total // (2**30)} GiB, Used: {used // (2**30)} GiB, Free: {free // (2**30)} GiB"
     else:
-        return None
+        return "I'm sorry, I didn't understand that."
 
-def chat_completion(message):
+def chat_completion(message, specific=False):
     # Generate a response using OpenAI's GPT-3
     prompt = message.content
     regex = r"<.*?>"
     prompt = re.sub(regex, "", prompt)
-    system_info = get_system_info(prompt)
-    if system_info is not None:
-        print(system_info)
-        return system_info
     chathistory.append({"role": "user", "content": prompt})
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-16k",
@@ -50,6 +46,29 @@ def chat_completion(message):
     )
     reply = response.choices[0].message.content
     chathistory.append({"role": "assistant", "content": reply})
+
+    # For specific function, check if reply contains special markers for system info
+    if specific:
+        if "CPU FUNCTION" in reply:
+            return "CPU"
+        elif "RAM FUNCTION" in reply:
+            return "RAM"
+        elif "DISK FUNCTION" in reply:
+            return "DISK"
+        else:
+            return None
+    # For general function, replace special markers with actual system info
+    else:
+        if "CPU FUNCTION" in reply:
+            cpu_info = get_system_info("CPU")
+            reply = reply.replace("CPU FUNCTION", cpu_info)
+        elif "RAM FUNCTION" in reply:
+            ram_info = get_system_info("RAM")
+            reply = reply.replace("RAM FUNCTION", ram_info)
+        elif "DISK FUNCTION" in reply:
+            disk_info = get_system_info("disk")
+            reply = reply.replace("DISK FUNCTION", disk_info)
+
     return reply
 
 async def send_message_chunks(channel, message):
@@ -68,6 +87,10 @@ async def on_message(message):
         return
     # Check if the bot was mentioned or if 'ChadGPT' is in the message content
     if client.user.mentioned_in(message) or 'ChadGPT' in message.content:
+        info_type = chat_completion(message, specific=True)
+        if info_type is not None:
+            system_info = get_system_info(info_type)
+            chathistory.append({"role": "system", "content": system_info})
         reply = chat_completion(message)
         # Check if the reply message is longer than 2000 characters
         if len(reply) > 2000:
