@@ -40,6 +40,7 @@ def chat_completion(message):
     prompt = re.sub(regex, "", prompt)
     system_info = get_system_info(prompt)
     if system_info is not None:
+        print system_info
         return system_info
     chathistory.append({"role": "user", "content": prompt})
     response = openai.ChatCompletion.create(
