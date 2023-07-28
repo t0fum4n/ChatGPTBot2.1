@@ -85,12 +85,12 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-    # Check if the bot was mentioned or if 'ChadGPT' is in the message content
+    # Check if the bot was mentioned or if 'ChadGPT' in the message content
     if client.user.mentioned_in(message) or 'ChadGPT' in message.content:
         info_type = chat_completion(message, specific=True)
         if info_type is not None:
             system_info = get_system_info(info_type)
-            chathistory.append({"role": "system", "content": system_info})
+            chathistory.append({"role": "system", "content": f"Here is the current system info related to the user's request: {system_info}"})
         reply = chat_completion(message)
         # Check if the reply message is longer than 2000 characters
         if len(reply) > 2000:
