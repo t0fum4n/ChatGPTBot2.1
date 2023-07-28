@@ -57,6 +57,17 @@ def chat_completion(message, specific=False):
             return "DISK"
         else:
             return None
+    # For general function, replace special markers with actual system info
+    else:
+        if "CPU FUNCTION" in reply:
+            cpu_info = get_system_info("CPU")
+            reply = reply.replace("CPU FUNCTION", cpu_info)
+        elif "RAM FUNCTION" in reply:
+            ram_info = get_system_info("RAM")
+            reply = reply.replace("RAM FUNCTION", ram_info)
+        elif "DISK FUNCTION" in reply:
+            disk_info = get_system_info("disk")
+            reply = reply.replace("DISK FUNCTION", disk_info)
 
     return reply
 
@@ -74,12 +85,12 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-    # Check if the bot was mentioned or if 'ChadGPT' in the message content
+    # Check if the bot was mentioned or if 'ChadGPT' is in the message content
     if client.user.mentioned_in(message) or 'ChadGPT' in message.content:
         info_type = chat_completion(message, specific=True)
         if info_type is not None:
             system_info = get_system_info(info_type)
-            chathistory.append({"role": "system", "content": f"Here is the current system info related to the user's request: {system_info}"})
+            chathistory.append({"role": "system", "content": system_info})
         reply = chat_completion(message)
         # Check if the reply message is longer than 2000 characters
         if len(reply) > 2000:
