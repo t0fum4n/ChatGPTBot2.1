@@ -33,7 +33,7 @@ def get_system_info(command):
     else:
         return None
 
-async def chat_completion(message):
+def chat_completion(message):
     # Generate a response using OpenAI's GPT-3
     prompt = message.content
     regex = r"<.*?>"
@@ -42,7 +42,7 @@ async def chat_completion(message):
     if system_info is not None:
         return system_info
     chathistory.append({"role": "user", "content": prompt})
-    response = await openai.ChatCompletion.create(
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-16k",
         messages=chathistory,
         temperature=0.3,
@@ -67,7 +67,7 @@ async def on_message(message):
         return
     # Check if the bot was mentioned or if 'ChadGPT' is in the message content
     if client.user.mentioned_in(message) or 'ChadGPT' in message.content:
-        reply = await chat_completion(message)
+        reply = chat_completion(message)
         # Check if the reply message is longer than 2000 characters
         if len(reply) > 2000:
             await send_message_chunks(message.channel, reply)
