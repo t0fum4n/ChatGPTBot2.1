@@ -48,7 +48,7 @@ async def on_message(message):
             prompt = re.sub(regex, "", prompt)
             #print(prompt)
             results = googlesearch_py.search(prompt)
-            #print(results)
+            print(results)
             a = f"Here is the data from a Google search relevant to what the user asked for. Data: {results}"
             #print(a)
             chathistory.append({"role": "user", "content": prompt})
