@@ -1,53 +1,23 @@
 import openai
 import discord
-import keys
 import re
 import googlesearch_py
+import keys
 
-## this is the main ##
+#________________________________________________________________________
 
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
 # Set up OpenAI API credentials
-openai.api_key = keys.openai_api_key
+openai.api_key = keys.oik
 
 # Create global chat history variable
 chathistory = [
-    {"role": "system", "content": "You are a Discord Bot that is powered by OpenAI. Your focus is on Cyber Security and providing more information to the user about cyber security related topics."},{"role": "system", "content": "Your creator's name is Tyler Hodges."},{"role": "system", "content": "You will recieve Google search results in the form of system messages like this that you can reference to give the user a better answer to their question."},
+    {"role": "system", "content": "You are an Artificial Intelligence with access to real time Google search data."},
+    {"role": "system", "content": "You will receive up to date and real time Google search data in system messages like this."},
+    {"role": "system", "content": "Please use that data to give the user a more accurate response."},
 ]
-
-def google_search(query):
-    # Perform a Google search
-    results = googlesearch_py.search(query)
-    search_results = [f"Title: {res['title']}\nLink: {res['link']}\nDescription: {res['description']}\n" for res in results[:5]]
-    return search_results
-    print(search_results)
-
-
-def chat_completion(message):
-    # Generate a response using OpenAI's GPT-3
-    prompt = message.content
-    regex = r"<.*?>"
-    prompt = re.sub(regex, "", prompt)
-    search_results = google_search(prompt)
-    for result in search_results:
-        chathistory.append({"role": "system", "content": result})
-    chathistory.append({"role": "user", "content": prompt})
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-16k",
-        messages=chathistory,
-        temperature=0.3,
-    )
-    reply = response.choices[0].message.content
-    chathistory.append({"role": "assistant", "content": reply})
-    return reply
-
-async def send_message_chunks(channel, message):
-    # Split message into chunks of 2000 characters and send them as separate messages
-    while message:
-        chunk, message = message[:2000], message[2000:]
-        await channel.send(chunk)
 
 @client.event
 async def on_ready():
@@ -57,13 +27,36 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-    # Check if the bot was mentioned or if 'ChadGPT' is in the message content
-    if client.user.mentioned_in(message) or 'ChadGPT' in message.content:
-        reply = chat_completion(message)
-        # Check if the reply message is longer than 2000 characters
-        if len(reply) > 2000:
-            await send_message_chunks(message.channel, reply)
-        else:
-            await message.channel.send(reply)
 
-client.run(keys.DISCORD_TOKEN)
+    if client.user.mentioned_in(message):
+        try:
+            # Generate a response using OpenAI's GPT-3
+            prompt = message.content
+            regex = r"<.*?>"
+            prompt = re.sub(regex, "", prompt)
+            results = googlesearch_py.search(prompt)
+            google_data = '\n'.join([f"Title: {res['title']}\nLink: {res['link']}\nDescription: {res['description']}\n" for res in results[:5]])
+            a = f"Here is the data from a Google search relevant to what the user asked for. Data: {google_data}"
+            chathistory.append({"role": "user", "content": prompt})
+            chathistory.append({"role": "system", "content":a})
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=chathistory,
+                temperature=0.3,
+            )
+            reply = response.choices[0].message.content
+            chathistory.append({"role": "assistant", "content":reply})
+        except openai.error.InvalidRequestError as e:
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                    {"role": "system", "content": "You have short term memory loss. You have forgotten everything that you were talking about. Let the user know that you have encountered an error and that you are back to normal."},
+                ],
+                    temperature=0.7,
+                )
+                reply = response.choices[0].message.content
+                chathistory.clear()
+
+        await message.channel.send(reply)
+
+client.run(keys.dk)
