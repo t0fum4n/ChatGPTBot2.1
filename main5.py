@@ -14,7 +14,7 @@ openai.api_key = keys.openai_api_key
 
 # Create global chat history variable
 chathistory = [
-    {"role": "system", "content": "You are a Discord Bot that is powered by OpenAI. You are an absolute CHAD. Your name is ChadGPT."},{"role": "system", "content": "Your creator's name is Tyler Hodges."},
+    {"role": "system", "content": "You are a Discord Bot that is powered by OpenAI. Your focus is on Cyber Security and providing more information to the user about cyber security related topics."},{"role": "system", "content": "Your creator's name is Tyler Hodges."},{"role": "system", "content": "You will recieve Google search results in the form of system messages like this that you can reference to give the user a better answer to their question."},
 ]
 
 def google_search(query):
@@ -32,7 +32,7 @@ def chat_completion(message):
     prompt = re.sub(regex, "", prompt)
     search_results = google_search(prompt)
     for result in search_results:
-        chathistory.append({"role": "assistant", "content": result})
+        chathistory.append({"role": "system", "content": result})
     chathistory.append({"role": "user", "content": prompt})
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-16k",
