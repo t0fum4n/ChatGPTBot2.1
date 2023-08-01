@@ -22,6 +22,7 @@ def google_search(query):
     results = googlesearch_py.search(query)
     search_results = [f"Title: {res['title']}\nLink: {res['link']}\nDescription: {res['description']}\n" for res in results[:5]]
     return search_results
+    print(search_results)
 
 
 def chat_completion(message):
