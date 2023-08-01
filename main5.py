@@ -19,9 +19,10 @@ chathistory = [
 
 def google_search(query):
     # Perform a Google search
-    results = googlesearch_py.search(query, num_results=5)
-    search_results = [f"Title: {res['title']}\nLink: {res['link']}\nDescription: {res['description']}\n" for res in results]
+    results = googlesearch_py.search(query)
+    search_results = [f"Title: {res['title']}\nLink: {res['link']}\nDescription: {res['description']}\n" for res in results[:5]]
     return search_results
+
 
 def chat_completion(message):
     # Generate a response using OpenAI's GPT-3
