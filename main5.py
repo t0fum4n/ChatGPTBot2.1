@@ -10,7 +10,7 @@ intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
 # Set up OpenAI API credentials
-openai.api_key = keys.oik
+openai.api_key = keys.openai_api_key
 
 # Create global chat history variable
 chathistory = [
