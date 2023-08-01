@@ -59,4 +59,4 @@ async def on_message(message):
 
         await message.channel.send(reply)
 
-client.run(keys.dk)
+client.run(keys.DISCORD_TOKEN)
