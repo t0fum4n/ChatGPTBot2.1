@@ -4,15 +4,6 @@ import keys
 import re
 import sqlite3
 
-def graceful_exit(signum, frame):
-    print("Received termination signal. Cleaning up...")
-    conn.close()  # Close the SQLite database connection
-    sys.exit(0)  # Exit the program
-
-# Register signal handlers
-signal.signal(signal.SIGINT, graceful_exit)  # Catch Ctrl+C
-signal.signal(signal.SIGTERM, graceful_exit)  # Catch terminate command
-
 # Initialize SQLite database
 conn = sqlite3.connect('chat_history.db')
 c = conn.cursor()
