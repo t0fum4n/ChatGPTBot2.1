@@ -60,7 +60,7 @@ async def on_message(message):
             )
             reply = response.choices[0].message.content
             chathistory.append({"role": "assistant", "content":reply})
-            #print(chathistory)
+            print(chathistory)
             #chathistory.clear()
         except openai.error.InvalidRequestError as e:
                 response = openai.ChatCompletion.create(
