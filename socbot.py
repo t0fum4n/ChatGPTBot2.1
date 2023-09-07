@@ -50,7 +50,7 @@ def chat_completion(message):
     last_log_entries = get_last_log_entries("/var/ossec/logs/active-responses.log", 5)
     for entry in last_log_entries:
         knowledge_messages.append({"role": "system", "content": f"Wazuh active response log entry: {entry}"})
-        print(knowledge_messages)
+        #print(knowledge_messages)
 
     # Generate a response using OpenAI's GPT-3
     prompt = message.content
@@ -75,7 +75,13 @@ def chat_completion(message):
     reply = response.choices[0].message.content
     chathistory.append({"role": "assistant", "content": reply})
     #print(chathistory)
-    print(full_history)
+    #print(full_history)
+
+    # Print full history to console for debugging
+    print("Full History:")
+    for msg in full_history:
+        print(f"{msg['role']}: {msg['content']}")
+
     return reply
 
 
