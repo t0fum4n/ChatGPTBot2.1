@@ -32,18 +32,24 @@ max_history = 100
 
 def get_last_log_entries(log_path, num_entries=5):
     try:
+        last_entries = []
         with open(log_path, 'r') as file:
-            log_data = json.load(file)
-            last_entries = log_data[-num_entries:] if log_data else [{"error": "No log entries found."}]
-            return last_entries
+            for line in file:
+                try:
+                    entry = json.loads(line.strip())
+                    last_entries.append(entry)
+                except json.JSONDecodeError:
+                    continue
+
+        last_entries = last_entries[-num_entries:] if last_entries else [{"error": "No log entries found."}]
+        return last_entries
     except FileNotFoundError:
         return [{"error": "Log file not found."}]
     except PermissionError:
         return [{"error": "Permission denied when reading the log file."}]
-    except json.JSONDecodeError:
-        return [{"error": "Error decoding JSON."}]
     except Exception as e:
         return [{"error": f"An error occurred: {e}"}]
+
 
 
 
