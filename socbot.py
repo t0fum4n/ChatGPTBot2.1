@@ -32,15 +32,18 @@ max_history = 100
 def get_last_log_entries(log_path, num_entries=5):
     try:
         with open(log_path, 'r') as file:
-            lines = file.readlines()
-            last_lines = lines[-num_entries:] if lines else ["No log entries found."]
-            return [line.strip() for line in last_lines]
+            log_data = json.load(file)
+            last_entries = log_data[-num_entries:] if log_data else [{"error": "No log entries found."}]
+            return last_entries
     except FileNotFoundError:
-        return ["Log file not found."]
+        return [{"error": "Log file not found."}]
     except PermissionError:
-        return ["Permission denied when reading the log file."]
+        return [{"error": "Permission denied when reading the log file."}]
+    except json.JSONDecodeError:
+        return [{"error": "Error decoding JSON."}]
     except Exception as e:
-        return [f"An error occurred: {e}"]
+        return [{"error": f"An error occurred: {e}"}]
+
 
 
 def chat_completion(message):
@@ -50,9 +53,9 @@ def chat_completion(message):
     knowledge_messages = [{"role": "system", "content": "This is where some data will be stored to reference."}]
 
     # Update knowledge_messages with the last 5 log entries
-    last_log_entries = get_last_log_entries("/var/ossec/logs/active-responses.log", 5)
+    last_log_entries = get_last_log_entries("/var/ossec/logs/alerts/alerts.json", 5)
     for entry in last_log_entries:
-        knowledge_messages.append({"role": "system", "content": f"Log entry: {entry}"})
+        knowledge_messages.append({"role": "system", "content": f"Log entry: {json.dumps(entry)}"})
 
     # Generate a response using OpenAI's GPT-3
     prompt = message.content
