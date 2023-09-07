@@ -21,12 +21,36 @@ system_messages = [
 # Create a separate global chat history variable
 chathistory = []
 
-# Max history messages to keep (not including system messages)
-max_history = 100
+# Create global knowledge messages variable
+knowledge_messages = [
+    {"role": "system", "content": "This is where some data will be stored to reference."},
+]
+
+# Max history messages to keep (not including system and knowledge messages)
+max_history = 10
+
+
+def get_last_log_entry(log_path):
+    try:
+        with open(log_path, 'r') as file:
+            lines = file.readlines()
+            last_line = lines[-1].strip() if lines else "No log entries found."
+            return last_line
+    except FileNotFoundError:
+        return "Log file not found."
+    except PermissionError:
+        return "Permission denied when reading the log file."
+    except Exception as e:
+        return f"An error occurred: {e}"
 
 
 def chat_completion(message):
-    global chathistory
+    global chathistory, knowledge_messages
+
+    # Update knowledge_messages with the last log entry
+    last_log_entry = get_last_log_entry("/var/ossec/logs/active-responses.log")
+    knowledge_messages.append({"role": "system", "content": f"Last log entry: {last_log_entry}"})
+
     # Generate a response using OpenAI's GPT-3
     prompt = message.content
     regex = r"<.*?>"
@@ -38,8 +62,8 @@ def chat_completion(message):
     while len(chathistory) > max_history:
         chathistory.pop(0)
 
-    # Prepend the system messages to the current chat history
-    full_history = system_messages + chathistory
+    # Prepend the system messages and knowledge messages to the current chat history
+    full_history = system_messages + knowledge_messages + chathistory
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-16k",
