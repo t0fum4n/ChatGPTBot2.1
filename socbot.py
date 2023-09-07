@@ -46,11 +46,13 @@ def get_last_log_entries(log_path, num_entries=5):
 def chat_completion(message):
     global chathistory, knowledge_messages
 
+    # Clear existing knowledge_messages
+    knowledge_messages = [{"role": "system", "content": "This is where some data will be stored to reference."}]
+
     # Update knowledge_messages with the last 5 log entries
     last_log_entries = get_last_log_entries("/var/ossec/logs/active-responses.log", 5)
     for entry in last_log_entries:
-        knowledge_messages.append({"role": "system", "content": f"Wazuh active response log entry: {entry}"})
-        #print(knowledge_messages)
+        knowledge_messages.append({"role": "system", "content": f"Log entry: {entry}"})
 
     # Generate a response using OpenAI's GPT-3
     prompt = message.content
