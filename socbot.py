@@ -2,6 +2,7 @@ import openai
 import discord
 import keys
 import re
+import json
 
 ## this is the main ##
 
