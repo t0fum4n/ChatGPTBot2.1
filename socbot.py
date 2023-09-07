@@ -73,6 +73,7 @@ def chat_completion(message):
 
     reply = response.choices[0].message.content
     chathistory.append({"role": "assistant", "content": reply})
+    print(chathistory)
     return reply
 
 
