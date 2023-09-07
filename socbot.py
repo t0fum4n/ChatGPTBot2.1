@@ -14,43 +14,43 @@ openai.api_key = keys.openai_api_key
 # Create global system messages variable
 system_messages = [
     {"role": "system",
-     "content": "You are a Discord Bot that is powered by OpenAI. You are an absolute CHAD. Your name is ChadGPT."},
-    {"role": "system", "content": "Your creator's name is Tyler Hodges."},
+     "content": "You are a Discord Bot that is powered by OpenAI. You are primarily focused on Cyber Security as you are somwhat of a SOCBot. Your name is ChadGPT."},
+    {"role": "system", "content": "Your creator's name is Tyler Hodges."},{"role": "system", "content": "You will recieve up to date active response logs from a Wazuh SIEM. The user may ask quetions about these alerts. When they do, reference the informaiton in the knowlege messages to assist the user."},
 ]
-
+# Create global knowledge messages variable
+knowledge_messages = [
+    {"role": "system", "content": "This is where the knowlege messages will come in"},
+]
 # Create a separate global chat history variable
 chathistory = []
 
-# Create global knowledge messages variable
-knowledge_messages = [
-    {"role": "system", "content": "This is where some data will be stored to reference."},
-]
 
 # Max history messages to keep (not including system and knowledge messages)
-max_history = 10
+max_history = 100
 
 
-def get_last_log_entry(log_path):
+def get_last_log_entries(log_path, num_entries=5):
     try:
         with open(log_path, 'r') as file:
             lines = file.readlines()
-            last_line = lines[-1].strip() if lines else "No log entries found."
-            return last_line
+            last_lines = lines[-num_entries:] if lines else ["No log entries found."]
+            return [line.strip() for line in last_lines]
     except FileNotFoundError:
-        return "Log file not found."
+        return ["Log file not found."]
     except PermissionError:
-        return "Permission denied when reading the log file."
+        return ["Permission denied when reading the log file."]
     except Exception as e:
-        return f"An error occurred: {e}"
+        return [f"An error occurred: {e}"]
 
 
 def chat_completion(message):
     global chathistory, knowledge_messages
 
-    # Update knowledge_messages with the last log entry
-    last_log_entry = get_last_log_entry("/var/ossec/logs/active-responses.log")
-    knowledge_messages.append({"role": "system", "content": f"Last log entry: {last_log_entry}"})
-    #print(knowledge_messages)
+    # Update knowledge_messages with the last 5 log entries
+    last_log_entries = get_last_log_entries("/var/ossec/logs/active-responses.log", 5)
+    for entry in last_log_entries:
+        knowledge_messages.append({"role": "system", "content": f"Wazuh active response log entry: {entry}"})
+        print(knowledge_messages)
 
     # Generate a response using OpenAI's GPT-3
     prompt = message.content
