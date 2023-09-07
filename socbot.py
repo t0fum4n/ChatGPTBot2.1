@@ -50,6 +50,7 @@ def chat_completion(message):
     # Update knowledge_messages with the last log entry
     last_log_entry = get_last_log_entry("/var/ossec/logs/active-responses.log")
     knowledge_messages.append({"role": "system", "content": f"Last log entry: {last_log_entry}"})
+    #print(knowledge_messages)
 
     # Generate a response using OpenAI's GPT-3
     prompt = message.content
@@ -73,7 +74,8 @@ def chat_completion(message):
 
     reply = response.choices[0].message.content
     chathistory.append({"role": "assistant", "content": reply})
-    print(chathistory)
+    #print(chathistory)
+    print(full_history)
     return reply
 
 
